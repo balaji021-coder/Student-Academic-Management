@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header"><h1>✏️ Edit Study Session</h1></div>
+<div class="card">
+    <div class="card-header"><h2>Update Study Log</h2></div>
+    <form method="POST" class="form">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Subject <span class="required">*</span></label>
+                <select name="subject_id" required>
+                    {% for s in subjects %}
+                    <option value="{{ s.id }}" {{ 'selected' if log.subject_id == s.id }}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Date <span class="required">*</span></label>
+                <input type="date" name="date" value="{{ log.date }}" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Hours <span class="required">*</span></label>
+                <input type="number" name="hours" value="{{ log.hours }}" min="0.5" max="16" step="0.5" required>
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea name="notes" rows="2">{{ log.notes or '' }}</textarea>
+            </div>
+        </div>
+        <div style="display:flex;gap:1rem;">
+            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+            <a href="{{ url_for('study_log') }}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

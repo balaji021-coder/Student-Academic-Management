@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header">
+    <h1>Welcome, {{ session.get('full_name') }}! 👋</h1>
+    <p>
+        {% if role == 'admin' %}System overview — all students and teachers.
+        {% elif role == 'teacher' %}Your teaching dashboard.
+        {% else %}Your personal academic progress.
+        {% endif %}
+    </p>
+</div>
+
+<!-- STAT CARDS -->
+<div class="stats-grid">
+    {% if role == 'admin' %}
+    <div class="stat-card" style="--accent:#6366f1;"><div class="stat-icon">🧑‍🎓</div><div class="stat-number">{{ stats.students }}</div><div class="stat-label">Students</div></div>
+    <div class="stat-card" style="--accent:#10b981;"><div class="stat-icon">👩‍🏫</div><div class="stat-number">{{ stats.teachers }}</div><div class="stat-label">Teachers</div></div>
+    <div class="stat-card" style="--accent:#f59e0b;"><div class="stat-icon">📖</div><div class="stat-number">{{ stats.subjects }}</div><div class="stat-label">Subjects</div></div>
+    <div class="stat-card" style="--accent:#ef4444;"><div class="stat-icon">📝</div><div class="stat-number">{{ stats.results }}</div><div class="stat-label">Results</div></div>
+
+    {% elif role == 'teacher' %}
+    <div class="stat-card" style="--accent:#6366f1;"><div class="stat-icon">📖</div><div class="stat-number">{{ stats.subjects }}</div><div class="stat-label">My Subjects</div></div>
+    <div class="stat-card" style="--accent:#10b981;"><div class="stat-icon">📝</div><div class="stat-number">{{ stats.results }}</div><div class="stat-label">Results Added</div></div>
+    <div class="stat-card" style="--accent:#f59e0b;"><div class="stat-icon">🧑‍🎓</div><div class="stat-number">{{ stats.students }}</div><div class="stat-label">Students Assessed</div></div>
+
+    {% else %}
+    <div class="stat-card" style="--accent:#6366f1;"><div class="stat-icon">📝</div><div class="stat-number">{{ stats.results }}</div><div class="stat-label">Exams Taken</div></div>
+    <div class="stat-card" style="--accent:#10b981;"><div class="stat-icon">⏱</div><div class="stat-number">{{ total_hours }}<span class="stat-unit">hrs</span></div><div class="stat-label">Study Hours</div></div>
+    <div class="stat-card" style="--accent:#f59e0b;"><div class="stat-icon">📖</div><div class="stat-number">{{ stats.subjects }}</div><div class="stat-label">Subjects</div></div>
+    {% endif %}
+</div>
+
+<!-- CHART -->
+<div class="card">
+    <div class="card-header">
+        <h2>📊 Performance Chart</h2>
+    </div>
+    <div class="chart-wrap">
+        <canvas id="mainChart"></canvas>
+    </div>
+</div>
+
+<!-- RECENT RESULTS TABLE -->
+<div class="card">
+    <div class="card-header">
+        <h2>🏆 {% if role == 'student' %}My Results{% else %}Recent Results{% endif %}</h2>
+        <a href="{{ url_for('results') }}" class="btn btn-outline btn-sm">View All</a>
+    </div>
+
+    {% set result_list = recent_results if role != 'student' else my_results %}
+    {% if result_list %}
+    <div class="table-wrap">
+    <table class="table">
+        <thead>
+            <tr>
+                {% if role != 'student' %}<th>Student</th>{% endif %}
+                <th>Subject</th><th>Exam</th><th>Marks</th><th>%</th><th>Grade</th><th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in result_list[:6] %}
+            <tr>
+                {% if role != 'student' %}<td>{{ r.student.full_name }}</td>{% endif %}
+                <td><strong>{{ r.subject.name }}</strong></td>
+                <td>{{ r.exam_name }}</td>
+                <td>{{ r.marks_obtained }}/{{ r.total_marks }}</td>
+                <td>{{ r.percentage }}%</td>
+                <td><span class="badge grade-{{ r.grade | replace('+','plus') }}">{{ r.grade }}</span></td>
+                <td>{{ r.date.strftime('%d %b %Y') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><div class="empty-icon">📭</div><p>No results yet.</p></div>
+    {% endif %}
+</div>
+
+{% if role == 'teacher' and my_subjects %}
+<div class="card">
+    <div class="card-header"><h2>📖 My Subjects</h2></div>
+    <div class="subject-chips" style="padding:1.2rem 1.5rem;">
+        {% for s in my_subjects %}<span class="chip">{{ s.name }}</span>{% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<script>
+const labels = {{ chart_labels | safe }};
+const data   = {{ chart_data | safe }};
+const ctx = document.getElementById('mainChart').getContext('2d');
+new Chart(ctx, {
+    type: '{{ "bar" if role != "student" else "line" }}',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: '{{ "Results Count" if role != "student" else "Percentage (%)" }}',
+            data: data,
+            backgroundColor: 'rgba(99, 102, 241, 0.18)',
+            borderColor: '#6366f1',
+            borderWidth: 2.5,
+            borderRadius: 8,
+            pointBackgroundColor: '#6366f1',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#f0f0f0' } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+</script>
+
+{% endblock %}

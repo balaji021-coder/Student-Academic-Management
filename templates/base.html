@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMS — Student Academic Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="{{ url_for('index') }}" class="nav-brand">
+        <span>🎓</span><span>SAMS</span>
+    </a>
+
+    <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+
+    <ul class="nav-links">
+        <li><a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">🏠 Dashboard</a></li>
+
+        {% if session.get('role') == 'admin' %}
+        <li><a href="{{ url_for('admin') }}" class="{{ 'active' if request.endpoint == 'admin' else '' }}">⚙️ Admin</a></li>
+        {% endif %}
+
+        <li><a href="{{ url_for('subjects') }}" class="{{ 'active' if request.endpoint == 'subjects' else '' }}">📖 Subjects</a></li>
+        <li><a href="{{ url_for('study_log') }}" class="{{ 'active' if request.endpoint == 'study_log' else '' }}">⏱ Study Log</a></li>
+        <li><a href="{{ url_for('results') }}" class="{{ 'active' if request.endpoint == 'results' else '' }}">🏆 Results</a></li>
+
+        <li class="nav-user">
+            <span class="role-pill role-{{ session.get('role') }}">{{ session.get('role', '').upper() }}</span>
+            <span class="nav-name">{{ session.get('full_name', '') }}</span>
+            <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+        </li>
+    </ul>
+</nav>
+
+<main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-wrap">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+    <p>Student Academic Management System &nbsp;·&nbsp; Built with Flask &amp; Python 🐍</p>
+</footer>
+
+</body>
+</html>

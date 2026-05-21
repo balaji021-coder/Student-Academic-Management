@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="page-header">
+    <h1>📖 Subjects</h1>
+    <p>{% if role == 'student' %}All available subjects.{% else %}Manage subjects here.{% endif %}</p>
+</div>
+
+{% if role in ['admin', 'teacher'] %}
+<div class="card">
+    <div class="card-header"><h2>➕ Add New Subject</h2></div>
+    <form method="POST" class="form">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Subject Name <span class="required">*</span></label>
+                <input type="text" name="name" placeholder="e.g. Mathematics" required>
+            </div>
+            {% if role == 'admin' %}
+            <div class="form-group">
+                <label>Assign Teacher</label>
+                <select name="teacher_id">
+                    <option value="">— No teacher assigned —</option>
+                    {% for t in teachers %}
+                    <option value="{{ t.id }}">{{ t.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">✚ Add Subject</button>
+    </form>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <h2>📋 All Subjects <span class="count-badge">{{ subjects | length }}</span></h2>
+    </div>
+    {% if subjects %}
+    <div class="table-wrap">
+    <table class="table">
+        <thead>
+            <tr><th>#</th><th>Subject</th><th>Teacher</th>
+            {% if role in ['admin','teacher'] %}<th>Actions</th>{% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in subjects %}
+            <tr>
+                <td class="row-num">{{ loop.index }}</td>
+                <td><strong>{{ s.name }}</strong></td>
+                <td>{{ s.teacher.full_name if s.teacher else '—' }}</td>
+                {% if role in ['admin','teacher'] %}
+                <td>
+                    <a href="{{ url_for('edit_subject', id=s.id) }}" class="btn btn-edit btn-sm">✏️ Edit</a>
+                    <a href="{{ url_for('delete_subject', id=s.id) }}" class="btn btn-danger btn-sm"
+                       onclick="return confirm('Delete {{ s.name }}?')">🗑 Delete</a>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><div class="empty-icon">📭</div><p>No subjects yet.</p></div>
+    {% endif %}
+</div>
+
+{% endblock %}

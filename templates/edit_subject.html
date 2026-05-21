@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header"><h1>✏️ Edit Subject</h1></div>
+<div class="card">
+    <div class="card-header"><h2>Update Subject Details</h2></div>
+    <form method="POST" class="form">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Subject Name <span class="required">*</span></label>
+                <input type="text" name="name" value="{{ subject.name }}" required>
+            </div>
+            {% if role == 'admin' %}
+            <div class="form-group">
+                <label>Assign Teacher</label>
+                <select name="teacher_id">
+                    <option value="">— No teacher —</option>
+                    {% for t in teachers %}
+                    <option value="{{ t.id }}" {{ 'selected' if subject.teacher_id == t.id else '' }}>{{ t.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+        </div>
+        <div style="display:flex;gap:1rem;">
+            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+            <a href="{{ url_for('subjects') }}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
