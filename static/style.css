@@ -1,11 +1,11 @@
 /* ===== CSS VARIABLES ===== */
 :root {
-    --primary:       #4338ca;
+    --primary:       #3a319e;
     --primary-dark:  #3730a3;
     --primary-light: #eef2ff;
     --success:       #059669;
     --danger:        #dc2626;
-    --warning:       #d97706;
+    --warning:       #4d2b04;
     --info:          #0284c7;
     --bg:            #f4f6fb;
     --card-bg:       #ffffff;
